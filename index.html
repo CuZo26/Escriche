@@ -10,7 +10,7 @@
     body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, sans-serif; background: #fafbfa; color: #172031; padding-bottom: 40px; }
     header { background: #1f2d3d; padding: 15px; text-align: center; }
     header a { display: inline-block; text-decoration: none; }
-    .logo { max-height: 50px; width: auto; display: block; margin: 0 auto; border: none; }
+    .logo { max-height: 55px; width: auto; display: block; margin: 0 auto; border: none; }
     .container { padding: 20px; max-width: 600px; margin: 0 auto; }
     .btn { background: #1f2d3d; color: white; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; margin-right: 10px; }
     .btn-secondary { background: #e0e0e0; color: #333; }
@@ -27,8 +27,7 @@
 
 <header>
   <a href="https://github.io">
-    <!-- ⬇️ REEMPLAZA "PON_AQUÍ_TU_IMAGEN.png" POR TU ARCHIVO O TU TEXTO LARGO BASE64 ⬇️ -->
-    <img class="logo" src="PON_AQUÍ_TU_IMAGEN.png" alt="Control de Producción" />
+    <img class="logo" src="data:image/svg+xml;utf8,<svg xmlns='http://w3.org' viewBox='0 0 24 24' fill='white'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z'/></svg>" alt="Control de Producción" />
   </a>
 </header>
 
@@ -110,11 +109,11 @@ function render(){
   document.getElementById("lines").innerHTML=state.lines.map(l=>`
     <div style="margin-top:15px; padding:10px; background:#f9f9f9; border:1px solid #eee;">
       <h4>Línea ${l.id}</h4>
-      ${l.breakdowns.length===0?'<p style="color:gray;font-size:14px;">Sin averías hoy</p>':`
+      \${l.breakdowns.length===0?'<p style="color:gray;font-size:14px;">Sin averías hoy</p>':`
         <table>
           <thead><tr><th>Hora</th><th>Min</th><th>Motivo</th></tr></thead>
           <tbody>
-            \${l.breakdowns.map(b=>`<tr><td>${b.time||'-'}</td><td>${b.duration}</td><td>${b.reason}</td></tr>`).join('')}
+            \${l.breakdowns.map(b=>`<tr><td>\${b.time||'-'}</td><td>\${b.duration}</td><td>\${b.reason}</td></tr>`).join('')}
           </tbody>
         </table>
       `}
@@ -128,14 +127,14 @@ function exportXlsx(){
   let s=`<?xml version="1.0" encoding="UTF-8"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Produccion"><Table><Row><Cell><Data ss:Type="String">Linea</Data></Cell><Cell><Data ss:Type="String">Fecha</Data></Cell><Cell><Data ss:Type="String">Hora</Data></Cell><Cell><Data ss:Type="String">Duracion</Data></Cell><Cell><Data ss:Type="String">Motivo</Data></Cell></Row>`;
   state.lines.forEach(l=>{
     l.breakdowns.forEach(b=>{
-      s+=`<Row><Cell><Data ss:Type="Number">${l.id}</Data></Cell><Cell><Data ss:Type="String">${state.date}</Data></Cell><Cell><Data ss:Type="String">${escXml(b.time)}</Data></Cell><Cell><Data ss:Type="Number">${b.duration}</Data></Cell><Cell><Data ss:Type="String">${escXml(b.reason)}</Data></Cell></Row>`;
+      s+=`<Row><Cell><Data ss:Type="Number">\${l.id}</Data></Cell><Cell><Data ss:Type="String">\${state.date}</Data></Cell><Cell><Data ss:Type="String">\${escXml(b.time)}</Data></Cell><Cell><Data ss:Type="Number">\${b.duration}</Data></Cell><Cell><Data ss:Type="String">\${escXml(b.reason)}</Data></Cell></Row>`;
     });
   });
   s+=`</Table></Worksheet></Workbook>`;
   const blob=new Blob([s],{type:"application/vnd.ms-excel"});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
-  a.download=`produccion_${state.date}.xls`;
+  a.download=`produccion_\${state.date}.xls`;
   a.click();
 }
 
