@@ -1,6 +1,7 @@
 {
   "name": "Escriche Control Producción",
   "short_name": "Escriche",
+  "description": "Control de producción de Escriche",
   "id": "./",
   "start_url": "./",
   "scope": "./",
