@@ -3,10 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-
 <meta name="theme-color" content="#1d2d52">
 <link rel="manifest" href="./manifest.json">
-
 <title>Control de Producción</title>
 
 <style>
@@ -38,9 +36,7 @@ header{
   object-fit:cover
 }
 
-.brand{
-  font-weight:800
-}
+.brand{font-weight:800}
 
 .sub{
   font-size:12px;
@@ -82,6 +78,11 @@ button.danger{
   color:#b42318
 }
 
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed
+}
+
 .day{
   background:#fff;
   border:1px solid #dce2ea;
@@ -96,7 +97,8 @@ button.danger{
   color:#667085
 }
 
-.day input{
+.day input,
+.day select{
   width:100%;
   padding:10px;
   border:1px solid #dce2ea;
@@ -108,6 +110,10 @@ button.danger{
 h1{
   font-size:22px;
   margin:8px 0 12px
+}
+
+h2{
+  font-size:18px
 }
 
 .line{
@@ -184,10 +190,6 @@ h1{
   margin-top:18px
 }
 
-.section h2{
-  font-size:18px
-}
-
 .bd{
   border-top:1px solid #dce2ea;
   padding:10px 0
@@ -222,6 +224,57 @@ h1{
   opacity:1
 }
 
+.loginBox{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  z-index:100;
+  align-items:center;
+  justify-content:center;
+  padding:20px
+}
+
+.loginCard{
+  background:#fff;
+  border-radius:18px;
+  padding:20px;
+  width:100%;
+  max-width:400px
+}
+
+.loginCard h2{
+  margin-top:0
+}
+
+.loginCard input{
+  width:100%;
+  padding:11px;
+  border:1px solid #dce2ea;
+  border-radius:10px;
+  margin:6px 0 10px;
+  font:inherit
+}
+
+.userbar{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-bottom:12px
+}
+
+.userbar span{
+  flex:1;
+  font-size:12px;
+  color:#667085
+}
+
+.history{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px
+}
+
 @media(max-width:520px){
   .fields{
     grid-template-columns:1fr
@@ -241,41 +294,85 @@ h1{
 <body>
 
 <header>
+  <img class="logo" src="./icon-512.png" alt="Escriche">
 
-  <img
-    class="logo"
-    src="./icon-512.png"
-    alt="Escriche"
-  >
-
-  <div>
+  <div style="flex:1">
     <div class="brand">Control de Producción</div>
-    <div class="sub">Rellenar durante el día · 5 líneas</div>
+    <div class="sub">Consulta online · 5 líneas</div>
   </div>
 
+  <button
+    id="authButton"
+    class="secondary"
+    style="padding:8px 10px"
+    onclick="openLogin()"
+  >
+    🔐 Entrar
+  </button>
 </header>
 
 <main>
 
-  <h1>Control de hoy</h1>
+  <div class="userbar">
+    <span id="modeText">
+      Modo consulta · Datos online
+    </span>
+
+    <button
+      id="logoutButton"
+      class="secondary"
+      style="display:none;padding:8px 10px"
+      onclick="logout()"
+    >
+      Salir
+    </button>
+  </div>
+
+  <h1>Control de producción</h1>
 
   <div class="actions">
     <button onclick="exportXlsx()">
       📊 EXPORTAR A EXCEL
     </button>
 
-    <button class="secondary" onclick="newDay()">
+    <button
+      id="newDayButton"
+      class="secondary"
+      onclick="newDay()"
+      disabled
+    >
       🔄 NUEVA JORNADA
     </button>
   </div>
 
   <div class="day">
-    <label>Fecha de producción</label>
-    <input
-      id="globalDate"
-      type="date"
-      onchange="setDate(this.value)"
+    <label>Consultar fecha</label>
+
+    <div class="history">
+      <input
+        id="globalDate"
+        type="date"
+        onchange="changeDate(this.value)"
+      >
+
+      <button
+        class="secondary"
+        onclick="loadSelectedDate()"
+      >
+        🔄 Cargar
+      </button>
+    </div>
+  </div>
+
+  <div class="day">
+    <label>Historial disponible</label>
+
+    <select
+      id="historySelect"
+      onchange="changeDate(this.value)"
     >
+      <option value="">Selecciona una fecha</option>
+    </select>
   </div>
 
   <div id="lines"></div>
@@ -295,19 +392,12 @@ h1{
 
         <div class="field">
           <label>Hora</label>
-          <input
-            id="bdat"
-            type="datetime-local"
-          >
+          <input id="bdat" type="datetime-local">
         </div>
 
         <div class="field">
           <label>Duración (minutos)</label>
-          <input
-            id="bdmin"
-            type="number"
-            min="0"
-          >
+          <input id="bdmin" type="number" min="0">
         </div>
 
         <div class="field">
@@ -326,8 +416,10 @@ h1{
       </div>
 
       <button
+        id="addBreakdownButton"
         style="margin-top:10px;width:100%"
         onclick="addBreakdown()"
+        disabled
       >
         + GUARDAR AVERÍA
       </button>
@@ -340,53 +432,139 @@ h1{
 
 </main>
 
+<div id="loginBox" class="loginBox">
+
+  <div class="loginCard">
+
+    <h2>🔐 Acceso administrador</h2>
+
+    <label>Correo electrónico</label>
+    <input
+      id="loginEmail"
+      type="email"
+      autocomplete="username"
+    >
+
+    <label>Contraseña</label>
+    <input
+      id="loginPassword"
+      type="password"
+      autocomplete="current-password"
+    >
+
+    <button
+      style="width:100%;margin-top:5px"
+      onclick="login()"
+    >
+      Entrar
+    </button>
+
+    <button
+      class="secondary"
+      style="width:100%;margin-top:8px"
+      onclick="closeLogin()"
+    >
+      Cancelar
+    </button>
+
+  </div>
+
+</div>
+
 <div id="toast" class="toast"></div>
 
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
+
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+const SUPABASE_URL =
+  'https://nbtzhmiyhfkolverzkmf.supabase.co';
+
+/*
+  PEGA AQUÍ TU CLAVE sb_publishable_...
+  No la publiques en el chat.
+*/
+
+const SUPABASE_KEY =
+  'sb_publishable_7J1ZWanI_-SgZBABNxtU2w_Ymb__dT7';
+
+const supabaseClient =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
 
 /* =========================================================
    DATOS
 ========================================================= */
 
-const KEY = 'control-produccion-editable-v1';
+const EMPTY_LINE = id => ({
+  id,
+  lot:'',
+  desc:'',
+  dims:'',
+  fondos:'',
+  humidity:'',
+  speed:'',
+  boxes:'',
+  start:'',
+  breakdowns:[]
+});
 
-let state =
-  JSON.parse(localStorage.getItem(KEY) || 'null') ||
-  {
-    date: new Date().toISOString().slice(0,10),
+let allRows = [];
 
-    lines: Array.from(
-      {length:5},
-      (_,i) => ({
-        id:i+1,
-        lot:'',
-        desc:'',
-        dims:'',
-        fondos:'',
-        humidity:'',
-        speed:'',
-        boxes:'',
-        start:'',
-        breakdowns:[]
-      })
-    )
-  };
+let currentDate =
+  new Date().toLocaleDateString(
+    'en-CA'
+  );
+
+let isAdmin = false;
 
 
 /* =========================================================
-   GUARDAR
+   FECHA LOCAL
 ========================================================= */
 
-function save(){
+function localDate(){
 
-  localStorage.setItem(
-    KEY,
-    JSON.stringify(state)
+  const d = new Date();
+
+  const y =
+    d.getFullYear();
+
+  const m =
+    String(d.getMonth()+1).padStart(2,'0');
+
+  const day =
+    String(d.getDate()).padStart(2,'0');
+
+  return `${y}-${m}-${day}`;
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function toast(t){
+
+  const x =
+    document.getElementById('toast');
+
+  x.textContent = t;
+
+  x.classList.add('show');
+
+  setTimeout(
+    () => x.classList.remove('show'),
+    1800
   );
-
-  render();
-
-  toast('Guardado');
 }
 
 
@@ -405,59 +583,394 @@ function esc(v){
       '"':'&quot;'
     }[c])
   );
-
 }
 
 
 /* =========================================================
-   MENSAJE
+   AUTENTICACIÓN
 ========================================================= */
 
-function toast(t){
+async function checkAuth(){
 
-  const x = document.getElementById('toast');
+  const {
+    data
+  } =
+    await supabaseClient.auth.getSession();
 
-  x.textContent = t;
+  isAdmin =
+    !!data.session;
 
-  x.classList.add('show');
+  updateMode();
 
-  setTimeout(
-    () => x.classList.remove('show'),
-    1400
-  );
+  render();
+}
+
+
+function updateMode(){
+
+  const authButton =
+    document.getElementById('authButton');
+
+  const logoutButton =
+    document.getElementById('logoutButton');
+
+  const newDayButton =
+    document.getElementById('newDayButton');
+
+  const addBreakdownButton =
+    document.getElementById(
+      'addBreakdownButton'
+    );
+
+  const modeText =
+    document.getElementById('modeText');
+
+  if(isAdmin){
+
+    authButton.style.display =
+      'none';
+
+    logoutButton.style.display =
+      'block';
+
+    newDayButton.disabled =
+      false;
+
+    addBreakdownButton.disabled =
+      false;
+
+    modeText.textContent =
+      '🔐 Administrador · Puedes editar los datos';
+
+  }else{
+
+    authButton.style.display =
+      'block';
+
+    logoutButton.style.display =
+      'none';
+
+    newDayButton.disabled =
+      true;
+
+    addBreakdownButton.disabled =
+      true;
+
+    modeText.textContent =
+      '👁️ Modo consulta · Solo lectura';
+
+  }
+}
+
+
+function openLogin(){
+
+  document.getElementById(
+    'loginBox'
+  ).style.display = 'flex';
 
 }
 
 
+function closeLogin(){
+
+  document.getElementById(
+    'loginBox'
+  ).style.display = 'none';
+
+}
+
+
+async function login(){
+
+  const email =
+    document.getElementById(
+      'loginEmail'
+    ).value.trim();
+
+  const password =
+    document.getElementById(
+      'loginPassword'
+    ).value;
+
+  if(!email || !password){
+
+    toast('Introduce correo y contraseña');
+
+    return;
+  }
+
+
+  const {
+    error
+  } =
+    await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+
+  if(error){
+
+    console.error(error);
+
+    toast(
+      'No se pudo iniciar sesión'
+    );
+
+    return;
+  }
+
+
+  closeLogin();
+
+  isAdmin = true;
+
+  updateMode();
+
+  render();
+
+  toast('Sesión iniciada');
+
+}
+
+
+async function logout(){
+
+  await supabaseClient.auth.signOut();
+
+  isAdmin = false;
+
+  updateMode();
+
+  render();
+
+  toast('Sesión cerrada');
+
+}
+
+
+supabaseClient.auth.onAuthStateChange(
+  (_event, session) => {
+
+    isAdmin =
+      !!session;
+
+    updateMode();
+
+    render();
+
+  }
+);
+
+
 /* =========================================================
-   FECHA
+   CARGAR DATOS ONLINE
 ========================================================= */
 
-function setDate(v){
+async function loadAll(){
 
-  state.date = v;
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from('Producción')
+      .select('*')
+      .order('Fecha', {ascending:false})
+      .order('Linea', {ascending:true});
 
-  state.lines.forEach(
-    l => l.date = v
-  );
 
-  save();
+  if(error){
+
+    console.error(error);
+
+    toast(
+      'Error cargando los datos'
+    );
+
+    return;
+  }
+
+
+  allRows =
+    data || [];
+
+
+  updateHistory();
+
+  render();
 
 }
 
 
 /* =========================================================
-   RENDERIZAR
+   HISTORIAL
+========================================================= */
+
+function updateHistory(){
+
+  const dates =
+    [...new Set(
+      allRows
+        .map(r => r.Fecha)
+        .filter(Boolean)
+    )]
+    .sort()
+    .reverse();
+
+
+  const select =
+    document.getElementById(
+      'historySelect'
+    );
+
+
+  select.innerHTML =
+    '<option value="">Selecciona una fecha</option>' +
+
+    dates.map(
+      d =>
+        `<option value="${esc(d)}">${esc(d)}</option>`
+    ).join('');
+
+
+  if(dates.includes(currentDate)){
+
+    select.value =
+      currentDate;
+
+  }
+
+}
+
+
+function changeDate(date){
+
+  if(!date) return;
+
+  currentDate =
+    date;
+
+  document.getElementById(
+    'globalDate'
+  ).value =
+    date;
+
+  document.getElementById(
+    'historySelect'
+  ).value =
+    date;
+
+  render();
+
+}
+
+
+function loadSelectedDate(){
+
+  const date =
+    document.getElementById(
+      'globalDate'
+    ).value;
+
+  if(date){
+
+    changeDate(date);
+
+  }
+
+}
+
+
+/* =========================================================
+   OBTENER LAS 5 LÍNEAS
+========================================================= */
+
+function getLinesForDate(){
+
+  const result =
+    Array.from(
+      {length:5},
+      (_,i) => EMPTY_LINE(i+1)
+    );
+
+
+  allRows
+    .filter(
+      r =>
+        String(r.Fecha) ===
+        String(currentDate)
+    )
+    .forEach(r => {
+
+      const id =
+        Number(r.Linea);
+
+      const line =
+        result.find(
+          x => x.id === id
+        );
+
+      if(!line) return;
+
+
+      line.lot =
+        r.Lote || '';
+
+      line.desc =
+        r['Descripción'] || '';
+
+      line.dims =
+        r['Dimensiones'] || '';
+
+      line.fondos =
+        r.Fondos || '';
+
+      line.humidity =
+        r.Humedad || '';
+
+      line.speed =
+        r.Velocidad ?? '';
+
+      line.boxes =
+        r.Cajas ?? '';
+
+      line.start =
+        r.Inicio || '';
+
+      line.breakdowns =
+        Array.isArray(r.Averías)
+        ? r.Averías
+        : [];
+
+    });
+
+
+  return result;
+}
+
+
+/* =========================================================
+   RENDER
 ========================================================= */
 
 function render(){
 
-  document.getElementById('globalDate').value =
-    state.date;
+  document.getElementById(
+    'globalDate'
+  ).value =
+    currentDate;
 
 
-  document.getElementById('lines').innerHTML =
-    state.lines.map(l => `
+  const lines =
+    getLinesForDate();
+
+
+  document.getElementById(
+    'lines'
+  ).innerHTML =
+    lines.map(l => `
 
       <div class="line">
 
@@ -466,116 +979,100 @@ function render(){
           <b>LÍNEA ${l.id}</b>
 
           <span class="status">
-            ${l.start ? 'EN PRODUCCIÓN' : 'PARADA'}
+            ${l.start
+              ? 'EN PRODUCCIÓN'
+              : 'PARADA'}
           </span>
 
         </div>
-
 
         <div class="form">
 
           <div class="fields">
 
-
             <div class="field">
               <label>Número de lote</label>
-
               <input
                 id="lot-${l.id}"
                 value="${esc(l.lot)}"
+                ${isAdmin ? '' : 'disabled'}
               >
             </div>
-
 
             <div class="field">
               <label>Descripción de la caja</label>
-
               <input
                 id="desc-${l.id}"
                 value="${esc(l.desc)}"
-                placeholder="Qué caja se está haciendo"
+                ${isAdmin ? '' : 'disabled'}
               >
             </div>
-
 
             <div class="field">
               <label>Dimensiones</label>
-
               <input
                 id="dims-${l.id}"
                 value="${esc(l.dims)}"
-                placeholder="L × A × H"
+                ${isAdmin ? '' : 'disabled'}
               >
             </div>
-
 
             <div class="field">
               <label>Tipo de fondos</label>
-
               <input
                 id="fondos-${l.id}"
                 value="${esc(l.fondos)}"
+                ${isAdmin ? '' : 'disabled'}
               >
             </div>
-
 
             <div class="field">
               <label>Humedad del cuadradillo</label>
-
               <input
                 id="humidity-${l.id}"
                 value="${esc(l.humidity)}"
-                placeholder="%"
+                ${isAdmin ? '' : 'disabled'}
               >
             </div>
 
-
             <div class="field">
               <label>Velocidad (cajas/hora)</label>
-
               <input
                 id="speed-${l.id}"
                 type="number"
                 min="0"
                 value="${esc(l.speed)}"
+                ${isAdmin ? '' : 'disabled'}
               >
             </div>
 
-
             <div class="field">
               <label>Cajas producidas</label>
-
               <input
                 id="boxes-${l.id}"
                 type="number"
                 min="0"
                 value="${esc(l.boxes)}"
+                ${isAdmin ? '' : 'disabled'}
               >
             </div>
 
-
             <div class="field">
               <label>Inicio de producción</label>
-
               <input
                 id="start-${l.id}"
                 type="datetime-local"
-                value="${
-                  l.start
-                  ? new Date(l.start)
-                      .toISOString()
-                      .slice(0,16)
-                  : ''
-                }"
+                value="${formatDateTimeLocal(l.start)}"
+                ${isAdmin ? '' : 'disabled'}
               >
             </div>
 
           </div>
 
-
           <button
             class="save"
             onclick="saveLine(${l.id})"
+            ${isAdmin ? '' : 'disabled'}
           >
             💾 GUARDAR LÍNEA ${l.id}
           </button>
@@ -587,20 +1084,59 @@ function render(){
     `).join('');
 
 
-  /* SELECT DE AVERÍAS */
+  document.getElementById(
+    'bdline'
+  ).innerHTML =
+    lines.map(
+      l =>
+        `<option value="${l.id}">
+          Línea ${l.id}
+        </option>`
+    ).join('');
 
-  document.getElementById('bdline').innerHTML =
-    state.lines.map(l => `
-      <option value="${l.id}">
-        Línea ${l.id}
-      </option>
-    `).join('');
+
+  renderBreakdowns(lines);
+
+}
 
 
-  /* TODAS LAS AVERÍAS */
+function formatDateTimeLocal(value){
 
-  let all =
-    state.lines.flatMap(
+  if(!value) return '';
+
+  if(
+    typeof value === 'string' &&
+    value.length >= 16 &&
+    value.includes('T')
+  ){
+
+    return value.slice(0,16);
+
+  }
+
+  try{
+
+    return new Date(value)
+      .toISOString()
+      .slice(0,16);
+
+  }catch{
+
+    return '';
+
+  }
+
+}
+
+
+/* =========================================================
+   AVERÍAS
+========================================================= */
+
+function renderBreakdowns(lines){
+
+  const all =
+    lines.flatMap(
       l =>
         (l.breakdowns || []).map(
           b => ({
@@ -608,13 +1144,19 @@ function render(){
             line:l.id
           })
         )
-    ).sort(
+    )
+    .sort(
       (a,b) =>
-        (b.at || '').localeCompare(a.at || '')
+        String(b.at || '')
+          .localeCompare(
+            String(a.at || '')
+          )
     );
 
 
-  document.getElementById('breakdowns').innerHTML =
+  document.getElementById(
+    'breakdowns'
+  ).innerHTML =
     all.length
 
     ?
@@ -642,14 +1184,19 @@ function render(){
 
         </div>
 
-
-        <button
-          class="danger"
-          style="margin-top:7px;padding:7px 10px"
-          onclick="delBd(${b.line},'${b.id}')"
-        >
-          Eliminar
-        </button>
+        ${
+          isAdmin
+          ?
+          `<button
+            class="danger"
+            style="margin-top:7px;padding:7px 10px"
+            onclick="delBd(${b.line},'${esc(b.id)}')"
+          >
+            Eliminar
+          </button>`
+          :
+          ''
+        }
 
       </div>
 
@@ -663,447 +1210,79 @@ function render(){
 
 
 /* =========================================================
-   GUARDAR LÍNEA
+   GUARDAR LÍNEA EN SUPABASE
 ========================================================= */
 
-function saveLine(id){
+async function saveLine(id){
 
-  const l =
-    state.lines.find(
-      x => x.id === id
-    );
+  if(!isAdmin){
 
-  if(!l) return;
-
-
-  l.lot =
-    document.getElementById(`lot-${id}`).value.trim();
-
-  l.desc =
-    document.getElementById(`desc-${id}`).value.trim();
-
-  l.dims =
-    document.getElementById(`dims-${id}`).value.trim();
-
-  l.fondos =
-    document.getElementById(`fondos-${id}`).value.trim();
-
-  l.humidity =
-    document.getElementById(`humidity-${id}`).value.trim();
-
-  l.speed =
-    document.getElementById(`speed-${id}`).value;
-
-  l.boxes =
-    document.getElementById(`boxes-${id}`).value;
-
-
-  const start =
-    document.getElementById(`start-${id}`).value;
-
-  l.start =
-    start
-    ? new Date(start).toISOString()
-    : '';
-
-
-  localStorage.setItem(
-    KEY,
-    JSON.stringify(state)
-  );
-
-  render();
-
-  toast(`Línea ${id} guardada`);
-
-}
-
-
-/* =========================================================
-   NUEVA JORNADA
-========================================================= */
-
-function newDay(){
-
-  if(
-    !confirm(
-      '¿Crear una nueva jornada?\\n\\nLos datos actuales se conservarán solamente en el navegador si los has exportado.'
-    )
-  ){
-    return;
-  }
-
-
-  const fecha =
-    new Date().toISOString().slice(0,10);
-
-
-  state = {
-
-    date:fecha,
-
-    lines:Array.from(
-      {length:5},
-      (_,i) => ({
-        id:i+1,
-        lot:'',
-        desc:'',
-        dims:'',
-        fondos:'',
-        humidity:'',
-        speed:'',
-        boxes:'',
-        start:'',
-        breakdowns:[]
-      })
-    )
-
-  };
-
-
-  localStorage.setItem(
-    KEY,
-    JSON.stringify(state)
-  );
-
-
-  render();
-
-  toast('Nueva jornada creada');
-
-}
-
-
-/* =========================================================
-   AÑADIR AVERÍA
-========================================================= */
-
-function addBreakdown(){
-
-  const lineId =
-    Number(
-      document.getElementById('bdline').value
-    );
-
-  const at =
-    document.getElementById('bdat').value;
-
-  const minutes =
-    Number(
-      document.getElementById('bdmin').value || 0
-    );
-
-  const reason =
-    document.getElementById('bdreason').value.trim();
-
-  const notes =
-    document.getElementById('bdnotes').value.trim();
-
-
-  const line =
-    state.lines.find(
-      l => l.id === lineId
-    );
-
-
-  if(!line){
-    toast('Selecciona una línea');
-    return;
-  }
-
-
-  if(!reason){
-
-    toast('Indica el motivo de la avería');
-
-    document
-      .getElementById('bdreason')
-      .focus();
+    toast('Necesitas iniciar sesión');
 
     return;
   }
 
 
-  if(!line.breakdowns){
-    line.breakdowns = [];
-  }
-
-
-  line.breakdowns.push({
-
-    id:
-      Date.now().toString(),
-
-    at:
-      at ||
-      new Date().toISOString().slice(0,16),
-
-    minutes,
-
-    reason,
-
-    notes
-
-  });
-
-
-  localStorage.setItem(
-    KEY,
-    JSON.stringify(state)
-  );
-
-
-  document.getElementById('bdat').value = '';
-  document.getElementById('bdmin').value = '';
-  document.getElementById('bdreason').value = '';
-  document.getElementById('bdnotes').value = '';
-
-
-  render();
-
-  toast('Avería guardada');
-
-}
-
-
-/* =========================================================
-   ELIMINAR AVERÍA
-========================================================= */
-
-function delBd(lineId,id){
-
-  const line =
-    state.lines.find(
-      l => l.id === lineId
-    );
-
-  if(!line) return;
-
-
-  if(
-    !confirm(
-      '¿Eliminar esta avería?'
-    )
-  ){
-    return;
-  }
-
-
-  line.breakdowns =
-    (line.breakdowns || [])
-      .filter(
-        b => String(b.id) !== String(id)
-      );
-
-
-  localStorage.setItem(
-    KEY,
-    JSON.stringify(state)
-  );
-
-
-  render();
-
-  toast('Avería eliminada');
-
-}
-
-
-/* =========================================================
-   EXPORTAR A EXCEL
-========================================================= */
-
-function exportXlsx(){
-
-  let rows = [];
-
-
-  rows.push([
-    'Fecha',
-    'Línea',
-    'Número de lote',
-    'Descripción de la caja',
-    'Dimensiones',
-    'Tipo de fondos',
-    'Humedad del cuadradillo',
-    'Velocidad (cajas/hora)',
-    'Cajas producidas',
-    'Inicio de producción'
-  ]);
-
-
-  state.lines.forEach(l => {
-
-    rows.push([
-
-      state.date,
-
-      l.id,
-
-      l.lot || '',
-
-      l.desc || '',
-
-      l.dims || '',
-
-      l.fondos || '',
-
-      l.humidity || '',
-
-      l.speed || '',
-
-      l.boxes || '',
-
-      l.start
-        ? new Date(l.start).toLocaleString('es-ES')
-        : ''
-
-    ]);
-
-  });
-
-
-  rows.push([]);
-
-  rows.push([
-    'AVERÍAS'
-  ]);
-
-  rows.push([
-    'Fecha',
-    'Línea',
-    'Hora',
-    'Duración (min)',
-    'Motivo',
-    'Observaciones'
-  ]);
-
-
-  state.lines.forEach(l => {
-
-    (l.breakdowns || []).forEach(b => {
-
-      rows.push([
-
-        state.date,
-
-        l.id,
-
-        b.at || '',
-
-        b.minutes || 0,
-
-        b.reason || '',
-
-        b.notes || ''
-
-      ]);
-
-    });
-
-  });
-
-
-  const csv =
-    rows
-      .map(row =>
-        row
-          .map(cell =>
-            '"' +
-            String(cell ?? '')
-              .replace(/"/g,'""') +
-            '"'
-          )
-          .join(';')
-      )
-      .join('\r\n');
-
-
-  const blob =
-    new Blob(
-      ['\uFEFF' + csv],
-      {
-        type:'text/csv;charset=utf-8;'
-      }
-    );
-
-
-  const url =
-    URL.createObjectURL(blob);
-
-
-  const a =
-    document.createElement('a');
-
-
-  const fecha =
-    state.date ||
-    new Date().toISOString().slice(0,10);
-
-
-  a.href = url;
-
-  a.download =
-    `Control-Produccion-${fecha}.csv`;
-
-
-  document.body.appendChild(a);
-
-  a.click();
-
-  a.remove();
-
-  URL.revokeObjectURL(url);
-
-
-  toast('Excel exportado');
-
-}
-
-
-/* =========================================================
-   SERVICE WORKER / PWA
-========================================================= */
-
-if('serviceWorker' in navigator){
-
-  window.addEventListener(
-    'load',
-    () => {
-
-      navigator.serviceWorker
-        .register('./sw.js')
-
-        .then(
-          () => {
-            console.log(
-              'Service Worker registrado correctamente'
-            );
-          }
-        )
-
-        .catch(
-          err => {
-            console.error(
-              'Error registrando Service Worker:',
-              err
-            );
-          }
-        );
-
+  const {
+    data:{
+      session
     }
-  );
+  } =
+    await supabaseClient.auth.getSession();
 
-}
+
+  if(!session){
+
+    toast('Necesitas iniciar sesión');
+
+    return;
+  }
 
 
-/* =========================================================
-   INICIO
-========================================================= */
+  const existing =
+    allRows.find(
+      r =>
+        String(r.Fecha) ===
+        String(currentDate) &&
+        Number(r.Linea) ===
+        Number(id)
+    );
 
-render();
 
-</script>
+  const values = {
 
-</body>
-</html>
+    Fecha:
+      currentDate,
+
+    Linea:
+      id,
+
+    Lote:
+      document.getElementById(
+        `lot-${id}`
+      ).value.trim(),
+
+    'Descripción':
+      document.getElementById(
+        `desc-${id}`
+      ).value.trim(),
+
+    'Dimensiones':
+      document.getElementById(
+        `dims-${id}`
+      ).value.trim(),
+
+    Fondos:
+      document.getElementById(
+        `fondos-${id}`
+      ).value.trim(),
+
+    Humedad:
+      document.getElementById(
+        `humidity-${id}`
+      ).value.trim(),
+
+    Velocidad:
+      document.getElementById(
+        `speed-${id}`
+      ).valu
