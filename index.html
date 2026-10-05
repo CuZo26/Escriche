@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1d2d52">
 <link rel="manifest" href="./manifest.json">
+
 <title>Control de Producción</title>
 
 <style>
@@ -44,9 +45,9 @@ header{
 }
 
 main{
-  max-width:760px;
+  max-width:900px;
   margin:auto;
-  padding:12px 10px 40px
+  padding:12px 10px 50px
 }
 
 .actions{
@@ -76,11 +77,6 @@ button.secondary{
 button.danger{
   background:#fee4e2;
   color:#b42318
-}
-
-button:disabled{
-  opacity:.45;
-  cursor:not-allowed
 }
 
 .day{
@@ -113,7 +109,8 @@ h1{
 }
 
 h2{
-  font-size:18px
+  font-size:18px;
+  margin:10px 0
 }
 
 .line{
@@ -186,6 +183,58 @@ h2{
   background:#18794e
 }
 
+.production-list{
+  margin-top:12px
+}
+
+.production{
+  border:1px solid #dce2ea;
+  border-radius:12px;
+  padding:10px;
+  margin-top:8px;
+  background:#fafbfc
+}
+
+.production-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px
+}
+
+.production-title{
+  font-weight:800
+}
+
+.production-data{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px 12px;
+  margin-top:7px;
+  font-size:12px
+}
+
+.production-data span{
+  color:#667085
+}
+
+.production-actions{
+  margin-top:8px;
+  display:flex;
+  gap:6px
+}
+
+.production-actions button{
+  padding:7px 10px;
+  font-size:12px
+}
+
+.empty{
+  color:#667085;
+  font-size:13px;
+  padding:5px 0
+}
+
 .section{
   margin-top:18px
 }
@@ -198,11 +247,6 @@ h2{
 .small{
   font-size:12px;
   color:#667085
-}
-
-.empty{
-  color:#667085;
-  font-size:13px
 }
 
 .toast{
@@ -224,58 +268,18 @@ h2{
   opacity:1
 }
 
-.loginBox{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  z-index:100;
-  align-items:center;
-  justify-content:center;
-  padding:20px
-}
-
-.loginCard{
-  background:#fff;
-  border-radius:18px;
-  padding:20px;
-  width:100%;
-  max-width:400px
-}
-
-.loginCard h2{
-  margin-top:0
-}
-
-.loginCard input{
-  width:100%;
-  padding:11px;
-  border:1px solid #dce2ea;
-  border-radius:10px;
-  margin:6px 0 10px;
-  font:inherit
-}
-
-.userbar{
-  display:flex;
-  gap:8px;
-  align-items:center;
+.info{
+  background:#e8f3ff;
+  border:1px solid #b9ddff;
+  color:#164c7e;
+  padding:10px;
+  border-radius:12px;
+  font-size:13px;
   margin-bottom:12px
 }
 
-.userbar span{
-  flex:1;
-  font-size:12px;
-  color:#667085
-}
-
-.history{
-  display:grid;
-  grid-template-columns:1fr auto;
-  gap:8px
-}
-
 @media(max-width:520px){
+
   .fields{
     grid-template-columns:1fr
   }
@@ -287,6 +291,10 @@ h2{
   .actions{
     grid-template-columns:1fr
   }
+
+  .production-data{
+    grid-template-columns:1fr
+  }
 }
 </style>
 </head>
@@ -294,88 +302,97 @@ h2{
 <body>
 
 <header>
-  <img class="logo" src="./icon-512.png" alt="Escriche">
+
+  <img
+    class="logo"
+    src="./icon-512.png"
+    alt="Escriche"
+  >
 
   <div style="flex:1">
-    <div class="brand">Control de Producción</div>
-    <div class="sub">Consulta online · 5 líneas</div>
+
+    <div class="brand">
+      Control de Producción
+    </div>
+
+    <div class="sub">
+      5 líneas · Múltiples producciones
+    </div>
+
   </div>
 
-  <button
-    id="authButton"
-    class="secondary"
-    style="padding:8px 10px"
-    onclick="openLogin()"
-  >
-    🔐 Entrar
-  </button>
 </header>
+
 
 <main>
 
-  <div class="userbar">
-    <span id="modeText">
-      Modo consulta · Datos online
-    </span>
-
-    <button
-      id="logoutButton"
-      class="secondary"
-      style="display:none;padding:8px 10px"
-      onclick="logout()"
-    >
-      Salir
-    </button>
-  </div>
-
   <h1>Control de producción</h1>
 
+  <div class="info">
+    Los datos se guardan automáticamente en este dispositivo.
+    Cada producción es independiente y no sobrescribe las anteriores.
+  </div>
+
+
   <div class="actions">
-    <button onclick="exportXlsx()">
+
+    <button onclick="exportExcel()">
       📊 EXPORTAR A EXCEL
     </button>
 
     <button
-      id="newDayButton"
       class="secondary"
       onclick="newDay()"
-      disabled
     >
       🔄 NUEVA JORNADA
     </button>
+
   </div>
 
+
+  <!-- FECHA -->
+
   <div class="day">
-    <label>Consultar fecha</label>
 
-    <div class="history">
-      <input
-        id="globalDate"
-        type="date"
-        onchange="changeDate(this.value)"
-      >
+    <label>
+      Fecha de producción
+    </label>
 
-      <button
-        class="secondary"
-        onclick="loadSelectedDate()"
-      >
-        🔄 Cargar
-      </button>
-    </div>
+    <input
+      id="globalDate"
+      type="date"
+      onchange="changeDate(this.value)"
+    >
+
   </div>
 
+
+  <!-- HISTORIAL -->
+
   <div class="day">
-    <label>Historial disponible</label>
+
+    <label>
+      Historial disponible
+    </label>
 
     <select
       id="historySelect"
       onchange="changeDate(this.value)"
     >
-      <option value="">Selecciona una fecha</option>
+      <option value="">
+        Selecciona una fecha
+      </option>
     </select>
+
   </div>
 
+
+  <!-- LÍNEAS -->
+
   <div id="lines"></div>
+
+
+  <!-- AVERÍAS -->
 
   <section class="section">
 
@@ -386,149 +403,140 @@ h2{
       <div class="fields">
 
         <div class="field">
-          <label>Línea</label>
-          <select id="bdline"></select>
+
+          <label>
+            Línea
+          </label>
+
+          <select id="bdline">
+
+            <option value="1">
+              Línea 1
+            </option>
+
+            <option value="2">
+              Línea 2
+            </option>
+
+            <option value="3">
+              Línea 3
+            </option>
+
+            <option value="4">
+              Línea 4
+            </option>
+
+            <option value="5">
+              Línea 5
+            </option>
+
+          </select>
+
         </div>
 
-        <div class="field">
-          <label>Hora</label>
-          <input id="bdat" type="datetime-local">
-        </div>
 
         <div class="field">
-          <label>Duración (minutos)</label>
-          <input id="bdmin" type="number" min="0">
+
+          <label>
+            Hora
+          </label>
+
+          <input
+            id="bdat"
+            type="datetime-local"
+          >
+
         </div>
 
+
         <div class="field">
-          <label>Motivo / avería</label>
+
+          <label>
+            Duración (minutos)
+          </label>
+
+          <input
+            id="bdmin"
+            type="number"
+            min="0"
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Motivo / avería
+          </label>
+
           <input
             id="bdreason"
             placeholder="Ej. atasco, cuchilla…"
           >
+
         </div>
 
+
         <div class="field full">
-          <label>Observaciones</label>
+
+          <label>
+            Observaciones
+          </label>
+
           <textarea id="bdnotes"></textarea>
+
         </div>
 
       </div>
 
+
       <button
-        id="addBreakdownButton"
         style="margin-top:10px;width:100%"
         onclick="addBreakdown()"
-        disabled
       >
         + GUARDAR AVERÍA
       </button>
 
     </div>
 
-    <div id="breakdowns" class="day"></div>
+
+    <div
+      id="breakdowns"
+      class="day"
+    ></div>
 
   </section>
 
 </main>
 
-<div id="loginBox" class="loginBox">
 
-  <div class="loginCard">
+<div
+  id="toast"
+  class="toast"
+></div>
 
-    <h2>🔐 Acceso administrador</h2>
 
-    <label>Correo electrónico</label>
-    <input
-      id="loginEmail"
-      type="email"
-      autocomplete="username"
-    >
+<!-- Librería para crear Excel -->
 
-    <label>Contraseña</label>
-    <input
-      id="loginPassword"
-      type="password"
-      autocomplete="current-password"
-    >
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-    <button
-      style="width:100%;margin-top:5px"
-      onclick="login()"
-    >
-      Entrar
-    </button>
-
-    <button
-      class="secondary"
-      style="width:100%;margin-top:8px"
-      onclick="closeLogin()"
-    >
-      Cancelar
-    </button>
-
-  </div>
-
-</div>
-
-<div id="toast" class="toast"></div>
-
-<!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 
 /* =========================================================
-   SUPABASE
+   CONFIGURACIÓN
 ========================================================= */
 
-const SUPABASE_URL =
-  'https://nbtzhmiyhfkolverzkmf.supabase.co';
+const STORAGE_KEY =
+  'escriche_produccion_v2';
 
-/*
-  PEGA AQUÍ TU CLAVE sb_publishable_...
-  No la publiques en el chat.
-*/
-
-const SUPABASE_KEY =
-  'sb_publishable_7J1ZWanI_-SgZBABNxtU2w_Ymb__dT7';
-
-const supabaseClient =
-  supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+const BREAKDOWN_KEY =
+  'escriche_averias_v2';
 
 
 /* =========================================================
-   DATOS
-========================================================= */
-
-const EMPTY_LINE = id => ({
-  id,
-  lot:'',
-  desc:'',
-  dims:'',
-  fondos:'',
-  humidity:'',
-  speed:'',
-  boxes:'',
-  start:'',
-  breakdowns:[]
-});
-
-let allRows = [];
-
-let currentDate =
-  new Date().toLocaleDateString(
-    'en-CA'
-  );
-
-let isAdmin = false;
-
-
-/* =========================================================
-   FECHA LOCAL
+   FECHA ACTUAL
 ========================================================= */
 
 function localDate(){
@@ -539,12 +547,57 @@ function localDate(){
     d.getFullYear();
 
   const m =
-    String(d.getMonth()+1).padStart(2,'0');
+    String(d.getMonth() + 1)
+      .padStart(2,'0');
 
   const day =
-    String(d.getDate()).padStart(2,'0');
+    String(d.getDate())
+      .padStart(2,'0');
 
   return `${y}-${m}-${day}`;
+}
+
+
+let currentDate =
+  localDate();
+
+
+/* =========================================================
+   DATOS
+========================================================= */
+
+let productions =
+  JSON.parse(
+    localStorage.getItem(
+      STORAGE_KEY
+    ) || '[]'
+  );
+
+
+let breakdowns =
+  JSON.parse(
+    localStorage.getItem(
+      BREAKDOWN_KEY
+    ) || '[]'
+  );
+
+
+/* =========================================================
+   GUARDAR DATOS
+========================================================= */
+
+function saveStorage(){
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(productions)
+  );
+
+  localStorage.setItem(
+    BREAKDOWN_KEY,
+    JSON.stringify(breakdowns)
+  );
+
 }
 
 
@@ -552,19 +605,22 @@ function localDate(){
    TOAST
 ========================================================= */
 
-function toast(t){
+function toast(message){
 
-  const x =
+  const element =
     document.getElementById('toast');
 
-  x.textContent = t;
+  element.textContent =
+    message;
 
-  x.classList.add('show');
+  element.classList.add('show');
 
   setTimeout(
-    () => x.classList.remove('show'),
+    () =>
+      element.classList.remove('show'),
     1800
   );
+
 }
 
 
@@ -572,9 +628,11 @@ function toast(t){
    ESCAPAR HTML
 ========================================================= */
 
-function esc(v){
+function esc(value){
 
-  return String(v ?? '').replace(
+  return String(
+    value ?? ''
+  ).replace(
     /[&<>"]/g,
     c => ({
       '&':'&amp;',
@@ -583,223 +641,498 @@ function esc(v){
       '"':'&quot;'
     }[c])
   );
+
 }
 
 
 /* =========================================================
-   AUTENTICACIÓN
+   LÍNEAS
 ========================================================= */
 
-async function checkAuth(){
+function render(){
 
-  const {
-    data
-  } =
-    await supabaseClient.auth.getSession();
+  document.getElementById(
+    'globalDate'
+  ).value =
+    currentDate;
 
-  isAdmin =
-    !!data.session;
 
-  updateMode();
+  renderLines();
 
-  render();
+  renderHistory();
+
+  renderBreakdowns();
+
 }
 
 
-function updateMode(){
+/* =========================================================
+   RENDER DE LAS 5 LÍNEAS
+========================================================= */
 
-  const authButton =
-    document.getElementById('authButton');
+function renderLines(){
 
-  const logoutButton =
-    document.getElementById('logoutButton');
+  const container =
+    document.getElementById('lines');
 
-  const newDayButton =
-    document.getElementById('newDayButton');
 
-  const addBreakdownButton =
-    document.getElementById(
-      'addBreakdownButton'
-    );
+  let html = '';
 
-  const modeText =
-    document.getElementById('modeText');
 
-  if(isAdmin){
+  for(let line = 1; line <= 5; line++){
 
-    authButton.style.display =
-      'none';
+    const rows =
+      productions.filter(
+        p =>
+          p.fecha === currentDate &&
+          Number(p.linea) === line
+      );
 
-    logoutButton.style.display =
-      'block';
 
-    newDayButton.disabled =
-      false;
+    html += `
 
-    addBreakdownButton.disabled =
-      false;
+      <div class="line">
 
-    modeText.textContent =
-      '🔐 Administrador · Puedes editar los datos';
+        <div class="linehead">
 
-  }else{
+          <b>
+            LÍNEA ${line}
+          </b>
 
-    authButton.style.display =
-      'block';
+          <span class="status">
+            ${rows.length
+              ? rows.length + ' producción' +
+                (rows.length === 1 ? '' : 'es')
+              : 'Sin producción'}
+          </span>
 
-    logoutButton.style.display =
-      'none';
+        </div>
 
-    newDayButton.disabled =
-      true;
 
-    addBreakdownButton.disabled =
-      true;
+        <div class="form">
 
-    modeText.textContent =
-      '👁️ Modo consulta · Solo lectura';
+          <div class="fields">
+
+            <div class="field">
+
+              <label>
+                Número de lote
+              </label>
+
+              <input
+                id="lot-${line}"
+                placeholder="Ej. L-1234"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Descripción de la caja
+              </label>
+
+              <input
+                id="desc-${line}"
+                placeholder="Ej. Caja grande"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Tipo de fondos
+              </label>
+
+              <input
+                id="fondos-${line}"
+                placeholder="Tipo de fondo"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Humedad del cuadradillo
+              </label>
+
+              <input
+                id="humidity-${line}"
+                placeholder="Ej. 12%"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Velocidad (cajas/hora)
+              </label>
+
+              <input
+                id="speed-${line}"
+                type="number"
+                min="0"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Cajas producidas
+              </label>
+
+              <input
+                id="boxes-${line}"
+                type="number"
+                min="0"
+              >
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                Inicio de producción
+              </label>
+
+              <input
+                id="start-${line}"
+                type="datetime-local"
+              >
+
+            </div>
+
+          </div>
+
+
+          <button
+            class="save"
+            onclick="saveProduction(${line})"
+          >
+            💾 GUARDAR PRODUCCIÓN LÍNEA ${line}
+          </button>
+
+
+          <div class="production-list">
+
+            ${
+              rows.length
+
+              ?
+
+              rows
+                .slice()
+                .sort(
+                  (a,b) =>
+                    String(b.inicio || '')
+                      .localeCompare(
+                        String(a.inicio || '')
+                      )
+                )
+                .map(
+                  p => productionHTML(p)
+                )
+                .join('')
+
+              :
+
+              '<div class="empty">Todavía no hay producciones en esta línea.</div>'
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+
+    `;
 
   }
-}
 
 
-function openLogin(){
-
-  document.getElementById(
-    'loginBox'
-  ).style.display = 'flex';
+  container.innerHTML =
+    html;
 
 }
 
 
-function closeLogin(){
+/* =========================================================
+   HTML DE UNA PRODUCCIÓN
+========================================================= */
 
-  document.getElementById(
-    'loginBox'
-  ).style.display = 'none';
+function productionHTML(p){
+
+  return `
+
+    <div class="production">
+
+      <div class="production-head">
+
+        <div class="production-title">
+          ${esc(p.lote || 'Sin lote')}
+        </div>
+
+        <button
+          class="danger"
+          onclick="deleteProduction('${p.id}')"
+        >
+          🗑️
+        </button>
+
+      </div>
+
+
+      <div class="production-data">
+
+        <div>
+          <span>Descripción:</span>
+          ${esc(p.descripcion || '-')}
+        </div>
+
+        <div>
+          <span>Fondos:</span>
+          ${esc(p.fondos || '-')}
+        </div>
+
+        <div>
+          <span>Humedad:</span>
+          ${esc(p.humedad || '-')}
+        </div>
+
+        <div>
+          <span>Velocidad:</span>
+          ${esc(p.velocidad || '-')}
+        </div>
+
+        <div>
+          <span>Cajas:</span>
+          ${esc(p.cajas || '-')}
+        </div>
+
+        <div>
+          <span>Inicio:</span>
+          ${esc(formatDateTime(p.inicio))}
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
 
 }
 
 
-async function login(){
+/* =========================================================
+   GUARDAR PRODUCCIÓN
+========================================================= */
 
-  const email =
+function saveProduction(line){
+
+  const lote =
     document.getElementById(
-      'loginEmail'
+      `lot-${line}`
     ).value.trim();
 
-  const password =
+
+  const descripcion =
     document.getElementById(
-      'loginPassword'
+      `desc-${line}`
+    ).value.trim();
+
+
+  const fondos =
+    document.getElementById(
+      `fondos-${line}`
+    ).value.trim();
+
+
+  const humedad =
+    document.getElementById(
+      `humidity-${line}`
+    ).value.trim();
+
+
+  const velocidad =
+    document.getElementById(
+      `speed-${line}`
     ).value;
 
-  if(!email || !password){
 
-    toast('Introduce correo y contraseña');
-
-    return;
-  }
-
-
-  const {
-    error
-  } =
-    await supabaseClient.auth.signInWithPassword({
-      email,
-      password
-    });
+  const cajas =
+    document.getElementById(
+      `boxes-${line}`
+    ).value;
 
 
-  if(error){
+  const inicio =
+    document.getElementById(
+      `start-${line}`
+    ).value;
 
-    console.error(error);
+
+  if(
+    !lote &&
+    !descripcion &&
+    !cajas &&
+    !inicio
+  ){
 
     toast(
-      'No se pudo iniciar sesión'
+      'Introduce al menos lote, cajas o inicio'
     );
 
     return;
+
   }
 
 
-  closeLogin();
+  const production = {
 
-  isAdmin = true;
+    id:
+      Date.now().toString() +
+      '_' +
+      Math.random()
+        .toString(36)
+        .slice(2),
 
-  updateMode();
+    fecha:
+      currentDate,
+
+    linea:
+      Number(line),
+
+    lote:
+      lote,
+
+    descripcion:
+      descripcion,
+
+    fondos:
+      fondos,
+
+    humedad:
+      humedad,
+
+    velocidad:
+      velocidad,
+
+    cajas:
+      cajas,
+
+    inicio:
+      inicio,
+
+    creado:
+      new Date().toISOString()
+
+  };
+
+
+  productions.push(
+    production
+  );
+
+
+  saveStorage();
+
+
+  /*
+    Limpiamos el formulario después
+    de guardar para poder introducir
+    inmediatamente la siguiente producción.
+  */
+
+  clearProductionForm(line);
+
 
   render();
 
-  toast('Sesión iniciada');
+
+  toast(
+    `Producción guardada en línea ${line}`
+  );
 
 }
-
-
-async function logout(){
-
-  await supabaseClient.auth.signOut();
-
-  isAdmin = false;
-
-  updateMode();
-
-  render();
-
-  toast('Sesión cerrada');
-
-}
-
-
-supabaseClient.auth.onAuthStateChange(
-  (_event, session) => {
-
-    isAdmin =
-      !!session;
-
-    updateMode();
-
-    render();
-
-  }
-);
 
 
 /* =========================================================
-   CARGAR DATOS ONLINE
+   LIMPIAR FORMULARIO
 ========================================================= */
 
-async function loadAll(){
+function clearProductionForm(line){
 
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from('Producción')
-      .select('*')
-      .order('Fecha', {ascending:false})
-      .order('Linea', {ascending:true});
+  document.getElementById(
+    `lot-${line}`
+  ).value = '';
+
+  document.getElementById(
+    `desc-${line}`
+  ).value = '';
+
+  document.getElementById(
+    `fondos-${line}`
+  ).value = '';
+
+  document.getElementById(
+    `humidity-${line}`
+  ).value = '';
+
+  document.getElementById(
+    `speed-${line}`
+  ).value = '';
+
+  document.getElementById(
+    `boxes-${line}`
+  ).value = '';
+
+  document.getElementById(
+    `start-${line}`
+  ).value = '';
+
+}
 
 
-  if(error){
+/* =========================================================
+   BORRAR PRODUCCIÓN
+========================================================= */
 
-    console.error(error);
+function deleteProduction(id){
 
-    toast(
-      'Error cargando los datos'
-    );
+  if(
+    !confirm(
+      '¿Quieres eliminar esta producción?'
+    )
+  ){
 
     return;
+
   }
 
 
-  allRows =
-    data || [];
+  productions =
+    productions.filter(
+      p => String(p.id) !== String(id)
+    );
 
 
-  updateHistory();
+  saveStorage();
 
   render();
+
+  toast(
+    'Producción eliminada'
+  );
 
 }
 
@@ -808,14 +1141,16 @@ async function loadAll(){
    HISTORIAL
 ========================================================= */
 
-function updateHistory(){
+function renderHistory(){
 
   const dates =
-    [...new Set(
-      allRows
-        .map(r => r.Fecha)
-        .filter(Boolean)
-    )]
+    [
+      ...new Set(
+        productions
+          .map(p => p.fecha)
+          .filter(Boolean)
+      )
+    ]
     .sort()
     .reverse();
 
@@ -830,299 +1165,108 @@ function updateHistory(){
     '<option value="">Selecciona una fecha</option>' +
 
     dates.map(
-      d =>
-        `<option value="${esc(d)}">${esc(d)}</option>`
+      date =>
+        `<option value="${esc(date)}">
+          ${esc(date)}
+        </option>`
     ).join('');
 
 
-  if(dates.includes(currentDate)){
-
-    select.value =
-      currentDate;
-
-  }
+  select.value =
+    currentDate;
 
 }
 
 
+/* =========================================================
+   CAMBIAR FECHA
+========================================================= */
+
 function changeDate(date){
 
-  if(!date) return;
+  if(!date){
+
+    return;
+
+  }
+
 
   currentDate =
     date;
 
-  document.getElementById(
-    'globalDate'
-  ).value =
-    date;
-
-  document.getElementById(
-    'historySelect'
-  ).value =
-    date;
 
   render();
 
 }
 
 
-function loadSelectedDate(){
+/* =========================================================
+   NUEVA JORNADA
+========================================================= */
 
-  const date =
-    document.getElementById(
-      'globalDate'
-    ).value;
+function newDay(){
 
-  if(date){
+  const today =
+    localDate();
 
-    changeDate(date);
 
-  }
+  currentDate =
+    today;
+
+
+  render();
+
+  toast(
+    'Nueva jornada preparada'
+  );
 
 }
 
 
 /* =========================================================
-   OBTENER LAS 5 LÍNEAS
+   FECHA/HORA PARA MOSTRAR
 ========================================================= */
 
-function getLinesForDate(){
+function formatDateTime(value){
 
-  const result =
-    Array.from(
-      {length:5},
-      (_,i) => EMPTY_LINE(i+1)
-    );
+  if(!value){
 
-
-  allRows
-    .filter(
-      r =>
-        String(r.Fecha) ===
-        String(currentDate)
-    )
-    .forEach(r => {
-
-      const id =
-        Number(r.Linea);
-
-      const line =
-        result.find(
-          x => x.id === id
-        );
-
-      if(!line) return;
-
-
-      line.lot =
-        r.Lote || '';
-
-      line.desc =
-        r['Descripción'] || '';
-
-      line.dims =
-        r['Dimensiones'] || '';
-
-      line.fondos =
-        r.Fondos || '';
-
-      line.humidity =
-        r.Humedad || '';
-
-      line.speed =
-        r.Velocidad ?? '';
-
-      line.boxes =
-        r.Cajas ?? '';
-
-      line.start =
-        r.Inicio || '';
-
-      line.breakdowns =
-        Array.isArray(r.Averías)
-        ? r.Averías
-        : [];
-
-    });
-
-
-  return result;
-}
-
-
-/* =========================================================
-   RENDER
-========================================================= */
-
-function render(){
-
-  document.getElementById(
-    'globalDate'
-  ).value =
-    currentDate;
-
-
-  const lines =
-    getLinesForDate();
-
-
-  document.getElementById(
-    'lines'
-  ).innerHTML =
-    lines.map(l => `
-
-      <div class="line">
-
-        <div class="linehead">
-
-          <b>LÍNEA ${l.id}</b>
-
-          <span class="status">
-            ${l.start
-              ? 'EN PRODUCCIÓN'
-              : 'PARADA'}
-          </span>
-
-        </div>
-
-        <div class="form">
-
-          <div class="fields">
-
-            <div class="field">
-              <label>Número de lote</label>
-              <input
-                id="lot-${l.id}"
-                value="${esc(l.lot)}"
-                ${isAdmin ? '' : 'disabled'}
-              >
-            </div>
-
-            <div class="field">
-              <label>Descripción de la caja</label>
-              <input
-                id="desc-${l.id}"
-                value="${esc(l.desc)}"
-                ${isAdmin ? '' : 'disabled'}
-              >
-            </div>
-
-            <div class="field">
-              <label>Dimensiones</label>
-              <input
-                id="dims-${l.id}"
-                value="${esc(l.dims)}"
-                ${isAdmin ? '' : 'disabled'}
-              >
-            </div>
-
-            <div class="field">
-              <label>Tipo de fondos</label>
-              <input
-                id="fondos-${l.id}"
-                value="${esc(l.fondos)}"
-                ${isAdmin ? '' : 'disabled'}
-              >
-            </div>
-
-            <div class="field">
-              <label>Humedad del cuadradillo</label>
-              <input
-                id="humidity-${l.id}"
-                value="${esc(l.humidity)}"
-                ${isAdmin ? '' : 'disabled'}
-              >
-            </div>
-
-            <div class="field">
-              <label>Velocidad (cajas/hora)</label>
-              <input
-                id="speed-${l.id}"
-                type="number"
-                min="0"
-                value="${esc(l.speed)}"
-                ${isAdmin ? '' : 'disabled'}
-              >
-            </div>
-
-            <div class="field">
-              <label>Cajas producidas</label>
-              <input
-                id="boxes-${l.id}"
-                type="number"
-                min="0"
-                value="${esc(l.boxes)}"
-                ${isAdmin ? '' : 'disabled'}
-              >
-            </div>
-
-            <div class="field">
-              <label>Inicio de producción</label>
-              <input
-                id="start-${l.id}"
-                type="datetime-local"
-                value="${formatDateTimeLocal(l.start)}"
-                ${isAdmin ? '' : 'disabled'}
-              >
-            </div>
-
-          </div>
-
-          <button
-            class="save"
-            onclick="saveLine(${l.id})"
-            ${isAdmin ? '' : 'disabled'}
-          >
-            💾 GUARDAR LÍNEA ${l.id}
-          </button>
-
-        </div>
-
-      </div>
-
-    `).join('');
-
-
-  document.getElementById(
-    'bdline'
-  ).innerHTML =
-    lines.map(
-      l =>
-        `<option value="${l.id}">
-          Línea ${l.id}
-        </option>`
-    ).join('');
-
-
-  renderBreakdowns(lines);
-
-}
-
-
-function formatDateTimeLocal(value){
-
-  if(!value) return '';
-
-  if(
-    typeof value === 'string' &&
-    value.length >= 16 &&
-    value.includes('T')
-  ){
-
-    return value.slice(0,16);
+    return '-';
 
   }
+
 
   try{
 
-    return new Date(value)
-      .toISOString()
-      .slice(0,16);
+    const d =
+      new Date(value);
+
+
+    if(
+      Number.isNaN(
+        d.getTime()
+      )
+    ){
+
+      return value;
+
+    }
+
+
+    return d.toLocaleString(
+      'es-ES',
+      {
+        day:'2-digit',
+        month:'2-digit',
+        year:'numeric',
+        hour:'2-digit',
+        minute:'2-digit'
+      }
+    );
 
   }catch{
 
-    return '';
+    return value;
 
   }
 
@@ -1133,156 +1277,116 @@ function formatDateTimeLocal(value){
    AVERÍAS
 ========================================================= */
 
-function renderBreakdowns(lines){
+function addBreakdown(){
 
-  const all =
-    lines.flatMap(
-      l =>
-        (l.breakdowns || []).map(
-          b => ({
-            ...b,
-            line:l.id
-          })
-        )
-    )
-    .sort(
-      (a,b) =>
-        String(b.at || '')
-          .localeCompare(
-            String(a.at || '')
-          )
+  const line =
+    Number(
+      document.getElementById(
+        'bdline'
+      ).value
     );
 
 
+  const at =
+    document.getElementById(
+      'bdat'
+    ).value;
+
+
+  const minutes =
+    document.getElementById(
+      'bdmin'
+    ).value;
+
+
+  const reason =
+    document.getElementById(
+      'bdreason'
+    ).value.trim();
+
+
+  const notes =
+    document.getElementById(
+      'bdnotes'
+    ).value.trim();
+
+
+  if(!reason){
+
+    toast(
+      'Introduce el motivo de la avería'
+    );
+
+    return;
+
+  }
+
+
+  breakdowns.push({
+
+    id:
+      Date.now().toString() +
+      '_' +
+      Math.random()
+        .toString(36)
+        .slice(2),
+
+    fecha:
+      currentDate,
+
+    linea:
+      line,
+
+    at:
+      at,
+
+    minutes:
+      minutes,
+
+    reason:
+      reason,
+
+    notes:
+      notes
+
+  });
+
+
+  saveStorage();
+
+
   document.getElementById(
-    'breakdowns'
-  ).innerHTML =
-    all.length
+    'bdmin'
+  ).value = '';
 
-    ?
+  document.getElementById(
+    'bdreason'
+  ).value = '';
 
-    all.map(b => `
+  document.getElementById(
+    'bdnotes'
+  ).value = '';
 
-      <div class="bd">
 
-        <b>
-          Línea ${b.line} ·
-          ${esc(b.reason || 'Avería')}
-        </b>
+  render();
 
-        <div class="small">
-
-          ${esc(b.at || '')}
-          ·
-          ${b.minutes || 0} min
-
-          ${
-            b.notes
-            ? ' · ' + esc(b.notes)
-            : ''
-          }
-
-        </div>
-
-        ${
-          isAdmin
-          ?
-          `<button
-            class="danger"
-            style="margin-top:7px;padding:7px 10px"
-            onclick="delBd(${b.line},'${esc(b.id)}')"
-          >
-            Eliminar
-          </button>`
-          :
-          ''
-        }
-
-      </div>
-
-    `).join('')
-
-    :
-
-    '<div class="empty">Todavía no hay averías.</div>';
+  toast(
+    'Avería guardada'
+  );
 
 }
 
 
 /* =========================================================
-   GUARDAR LÍNEA EN SUPABASE
+   MOSTRAR AVERÍAS
 ========================================================= */
 
-async function saveLine(id){
+function renderBreakdowns(){
 
-  if(!isAdmin){
-
-    toast('Necesitas iniciar sesión');
-
-    return;
-  }
-
-
-  const {
-    data:{
-      session
-    }
-  } =
-    await supabaseClient.auth.getSession();
-
-
-  if(!session){
-
-    toast('Necesitas iniciar sesión');
-
-    return;
-  }
-
-
-  const existing =
-    allRows.find(
-      r =>
-        String(r.Fecha) ===
-        String(currentDate) &&
-        Number(r.Linea) ===
-        Number(id)
-    );
-
-
-  const values = {
-
-    Fecha:
-      currentDate,
-
-    Linea:
-      id,
-
-    Lote:
-      document.getElementById(
-        `lot-${id}`
-      ).value.trim(),
-
-    'Descripción':
-      document.getElementById(
-        `desc-${id}`
-      ).value.trim(),
-
-    'Dimensiones':
-      document.getElementById(
-        `dims-${id}`
-      ).value.trim(),
-
-    Fondos:
-      document.getElementById(
-        `fondos-${id}`
-      ).value.trim(),
-
-    Humedad:
-      document.getElementById(
-        `humidity-${id}`
-      ).value.trim(),
-
-    Velocidad:
-      document.getElementById(
-        `speed-${id}`
-      ).valu
+  const list =
+    breakdowns
+      .filter(
+        b =>
+          b.fecha === currentDate
+      )
+      .so
