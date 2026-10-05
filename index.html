@@ -2,1391 +2,320 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#1d2d52">
 <link rel="manifest" href="./manifest.json">
-
 <title>Control de Producción</title>
 
 <style>
 *{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,sans-serif;
-  background:#f4f6fa;
-  color:#172033
-}
-
-header{
-  position:sticky;
-  top:0;
-  z-index:10;
-  background:#fff;
-  border-bottom:1px solid #dce2ea;
-  padding:10px 12px;
-  display:flex;
-  align-items:center;
-  gap:10px
-}
-
-.logo{
-  width:42px;
-  height:42px;
-  border-radius:10px;
-  object-fit:cover
-}
-
-.brand{font-weight:800}
-
-.sub{
-  font-size:12px;
-  color:#667085
-}
-
-main{
-  max-width:900px;
-  margin:auto;
-  padding:12px 10px 50px
-}
-
-.actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  margin-bottom:12px
-}
-
-button{
-  border:0;
-  border-radius:12px;
-  padding:12px;
-  font-weight:800;
-  font-size:14px;
-  background:#1d2d52;
-  color:white;
-  cursor:pointer
-}
-
-button.secondary{
-  background:#eef2f7;
-  color:#172033;
-  border:1px solid #dce2ea
-}
-
-button.danger{
-  background:#fee4e2;
-  color:#b42318
-}
-
-.day{
-  background:#fff;
-  border:1px solid #dce2ea;
-  border-radius:16px;
-  padding:12px;
-  margin-bottom:12px
-}
-
-.day label{
-  font-size:12px;
-  font-weight:700;
-  color:#667085
-}
-
-.day input,
-.day select{
-  width:100%;
-  padding:10px;
-  border:1px solid #dce2ea;
-  border-radius:10px;
-  font:inherit;
-  margin-top:4px
-}
-
-h1{
-  font-size:22px;
-  margin:8px 0 12px
-}
-
-h2{
-  font-size:18px;
-  margin:10px 0
-}
-
-.line{
-  background:#fff;
-  border:1px solid #dce2ea;
-  border-radius:16px;
-  margin:12px 0;
-  overflow:hidden
-}
-
-.linehead{
-  padding:12px;
-  background:#eef2f7;
-  display:flex;
-  justify-content:space-between;
-  align-items:center
-}
-
-.linehead b{
-  font-size:18px
-}
-
-.status{
-  font-size:11px;
-  padding:5px 8px;
-  border-radius:20px;
-  background:#fff
-}
-
-.form{
-  padding:12px
-}
-
-.fields{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:9px
-}
-
-.field label{
-  display:block;
-  font-size:11px;
-  font-weight:750;
-  color:#667085;
-  margin-bottom:3px
-}
-
-.field input,
-.field select,
-.field textarea{
-  width:100%;
-  padding:10px;
-  border:1px solid #dce2ea;
-  border-radius:10px;
-  font:inherit;
-  background:#fff
-}
-
-.field textarea{
-  min-height:62px
-}
-
-.full{
-  grid-column:1/-1
-}
-
-.save{
-  margin-top:10px;
-  width:100%;
-  background:#18794e
-}
-
-.production-list{
-  margin-top:12px
-}
-
-.production{
-  border:1px solid #dce2ea;
-  border-radius:12px;
-  padding:10px;
-  margin-top:8px;
-  background:#fafbfc
-}
-
-.production-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:8px
-}
-
-.production-title{
-  font-weight:800
-}
-
-.production-data{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:5px 12px;
-  margin-top:7px;
-  font-size:12px
-}
-
-.production-data span{
-  color:#667085
-}
-
-.production-actions{
-  margin-top:8px;
-  display:flex;
-  gap:6px
-}
-
-.production-actions button{
-  padding:7px 10px;
-  font-size:12px
-}
-
-.empty{
-  color:#667085;
-  font-size:13px;
-  padding:5px 0
-}
-
-.section{
-  margin-top:18px
-}
-
-.bd{
-  border-top:1px solid #dce2ea;
-  padding:10px 0
-}
-
-.small{
-  font-size:12px;
-  color:#667085
-}
-
-.toast{
-  position:fixed;
-  left:50%;
-  bottom:18px;
-  transform:translateX(-50%);
-  background:#172033;
-  color:#fff;
-  padding:10px 14px;
-  border-radius:12px;
-  opacity:0;
-  transition:.2s;
-  z-index:20;
-  pointer-events:none
-}
-
-.toast.show{
-  opacity:1
-}
-
-.info{
-  background:#e8f3ff;
-  border:1px solid #b9ddff;
-  color:#164c7e;
-  padding:10px;
-  border-radius:12px;
-  font-size:13px;
-  margin-bottom:12px
-}
-
-@media(max-width:520px){
-
-  .fields{
-    grid-template-columns:1fr
-  }
-
-  .full{
-    grid-column:auto
-  }
-
-  .actions{
-    grid-template-columns:1fr
-  }
-
-  .production-data{
-    grid-template-columns:1fr
-  }
-}
+body{margin:0;font-family:system-ui;background:#f4f6fa;color:#172033}
+header{background:#fff;border-bottom:1px solid #dce2ea;padding:10px 12px;display:flex;gap:10px;align-items:center;position:sticky;top:0;z-index:5}
+.logo{width:42px;height:42px;border-radius:10px}.brand{font-weight:800}.sub{font-size:12px;color:#667085}
+main{max-width:900px;margin:auto;padding:12px 10px 50px}
+h1{font-size:22px}h2{font-size:18px}
+button{border:0;border-radius:10px;padding:11px;font-weight:800;background:#1d2d52;color:#fff}
+button.secondary{background:#eef2f7;color:#172033;border:1px solid #dce2ea}
+button.danger{background:#fee4e2;color:#b42318}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.day,.line{background:#fff;border:1px solid #dce2ea;border-radius:14px;padding:12px;margin:12px 0}
+.line{padding:0;overflow:hidden}
+.linehead{padding:12px;background:#eef2f7;display:flex;justify-content:space-between}
+.form{padding:12px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.field label,.day label{display:block;font-size:11px;font-weight:800;color:#667085}
+input,select,textarea{width:100%;padding:9px;border:1px solid #dce2ea;border-radius:9px;font:inherit}
+.full{grid-column:1/-1}.save{width:100%;margin-top:10px;background:#18794e}
+.production{border:1px solid #dce2ea;border-radius:10px;padding:9px;margin-top:8px;background:#fafbfc}
+.production-head{display:flex;justify-content:space-between;align-items:center}
+.production-title{font-weight:800}.data{font-size:12px;margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.data span{color:#667085}.pactions{display:flex;gap:6px;margin-top:8px}.pactions button{padding:7px;font-size:12px}
+.status{font-size:11px}.empty{font-size:12px;color:#667085;margin-top:8px}
+.info{background:#e8f3ff;border:1px solid #b9ddff;padding:10px;border-radius:10px;font-size:13px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#172033;color:#fff;padding:10px 14px;border-radius:10px;display:none}
+.toast.show{display:block}
+@media(max-width:520px){.fields,.data,.actions{grid-template-columns:1fr}.full{grid-column:auto}}
 </style>
 </head>
 
 <body>
 
 <header>
-
-  <img
-    class="logo"
-    src="./icon-512.png"
-    alt="Escriche"
-  >
-
-  <div style="flex:1">
-
-    <div class="brand">
-      Control de Producción
-    </div>
-
-    <div class="sub">
-      5 líneas · Múltiples producciones
-    </div>
-
-  </div>
-
+<img class="logo" src="./icon-512.png" alt="">
+<div><div class="brand">Control de Producción</div><div class="sub">5 líneas · Múltiples producciones</div></div>
 </header>
 
-
 <main>
+<h1>Control de producción</h1>
 
-  <h1>Control de producción</h1>
+<div class="info">
+Cada vez que pulses guardar se crea una producción nueva. Las anteriores no se sobrescriben.
+</div>
 
-  <div class="info">
-    Los datos se guardan automáticamente en este dispositivo.
-    Cada producción es independiente y no sobrescribe las anteriores.
-  </div>
+<div class="actions">
+<button onclick="exportAll()">📊 TODAS A EXCEL</button>
+<button class="secondary" onclick="newDay()">🔄 NUEVA JORNADA</button>
+</div>
 
+<div class="day">
+<label>Fecha</label>
+<input id="date" type="date" onchange="changeDate(this.value)">
+</div>
 
-  <div class="actions">
+<div id="lines"></div>
 
-    <button onclick="exportExcel()">
-      📊 EXPORTAR A EXCEL
-    </button>
+<h2>⚠️ Averías</h2>
 
-    <button
-      class="secondary"
-      onclick="newDay()"
-    >
-      🔄 NUEVA JORNADA
-    </button>
+<div class="day">
+<div class="fields">
 
-  </div>
+<div class="field">
+<label>Línea</label>
+<select id="bdline">
+<option value="1">Línea 1</option><option value="2">Línea 2</option>
+<option value="3">Línea 3</option><option value="4">Línea 4</option>
+<option value="5">Línea 5</option>
+</select>
+</div>
 
+<div class="field">
+<label>Hora</label><input id="bdat" type="datetime-local">
+</div>
 
-  <!-- FECHA -->
+<div class="field">
+<label>Minutos</label><input id="bdmin" type="number" min="0">
+</div>
 
-  <div class="day">
+<div class="field">
+<label>Motivo</label><input id="bdreason" placeholder="Ej. atasco">
+</div>
 
-    <label>
-      Fecha de producción
-    </label>
+<div class="field full">
+<label>Observaciones</label><textarea id="bdnotes"></textarea>
+</div>
 
-    <input
-      id="globalDate"
-      type="date"
-      onchange="changeDate(this.value)"
-    >
+</div>
 
-  </div>
+<button style="width:100%;margin-top:10px" onclick="addBreakdown()">+ GUARDAR AVERÍA</button>
+</div>
 
-
-  <!-- HISTORIAL -->
-
-  <div class="day">
-
-    <label>
-      Historial disponible
-    </label>
-
-    <select
-      id="historySelect"
-      onchange="changeDate(this.value)"
-    >
-      <option value="">
-        Selecciona una fecha
-      </option>
-    </select>
-
-  </div>
-
-
-  <!-- LÍNEAS -->
-
-  <div id="lines"></div>
-
-
-  <!-- AVERÍAS -->
-
-  <section class="section">
-
-    <h2>⚠️ Averías</h2>
-
-    <div class="day">
-
-      <div class="fields">
-
-        <div class="field">
-
-          <label>
-            Línea
-          </label>
-
-          <select id="bdline">
-
-            <option value="1">
-              Línea 1
-            </option>
-
-            <option value="2">
-              Línea 2
-            </option>
-
-            <option value="3">
-              Línea 3
-            </option>
-
-            <option value="4">
-              Línea 4
-            </option>
-
-            <option value="5">
-              Línea 5
-            </option>
-
-          </select>
-
-        </div>
-
-
-        <div class="field">
-
-          <label>
-            Hora
-          </label>
-
-          <input
-            id="bdat"
-            type="datetime-local"
-          >
-
-        </div>
-
-
-        <div class="field">
-
-          <label>
-            Duración (minutos)
-          </label>
-
-          <input
-            id="bdmin"
-            type="number"
-            min="0"
-          >
-
-        </div>
-
-
-        <div class="field">
-
-          <label>
-            Motivo / avería
-          </label>
-
-          <input
-            id="bdreason"
-            placeholder="Ej. atasco, cuchilla…"
-          >
-
-        </div>
-
-
-        <div class="field full">
-
-          <label>
-            Observaciones
-          </label>
-
-          <textarea id="bdnotes"></textarea>
-
-        </div>
-
-      </div>
-
-
-      <button
-        style="margin-top:10px;width:100%"
-        onclick="addBreakdown()"
-      >
-        + GUARDAR AVERÍA
-      </button>
-
-    </div>
-
-
-    <div
-      id="breakdowns"
-      class="day"
-    ></div>
-
-  </section>
-
+<div id="breakdowns" class="day"></div>
 </main>
 
-
-<div
-  id="toast"
-  class="toast"
-></div>
-
-
-<!-- Librería para crear Excel -->
+<div id="toast" class="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-
 <script>
+const KEY='escriche_produccion_v2',BDKEY='escriche_averias_v2';
 
-/* =========================================================
-   CONFIGURACIÓN
-========================================================= */
+const today=()=>{
+ const d=new Date();
+ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+};
 
-const STORAGE_KEY =
-  'escriche_produccion_v2';
+let currentDate=today();
+let productions=JSON.parse(localStorage.getItem(KEY)||'[]');
+let breakdowns=JSON.parse(localStorage.getItem(BDKEY)||'[]');
 
-const BREAKDOWN_KEY =
-  'escriche_averias_v2';
-
-
-/* =========================================================
-   FECHA ACTUAL
-========================================================= */
-
-function localDate(){
-
-  const d = new Date();
-
-  const y =
-    d.getFullYear();
-
-  const m =
-    String(d.getMonth() + 1)
-      .padStart(2,'0');
-
-  const day =
-    String(d.getDate())
-      .padStart(2,'0');
-
-  return `${y}-${m}-${day}`;
+function save(){
+ localStorage.setItem(KEY,JSON.stringify(productions));
+ localStorage.setItem(BDKEY,JSON.stringify(breakdowns));
 }
 
-
-let currentDate =
-  localDate();
-
-
-/* =========================================================
-   DATOS
-========================================================= */
-
-let productions =
-  JSON.parse(
-    localStorage.getItem(
-      STORAGE_KEY
-    ) || '[]'
-  );
-
-
-let breakdowns =
-  JSON.parse(
-    localStorage.getItem(
-      BREAKDOWN_KEY
-    ) || '[]'
-  );
-
-
-/* =========================================================
-   GUARDAR DATOS
-========================================================= */
-
-function saveStorage(){
-
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(productions)
-  );
-
-  localStorage.setItem(
-    BREAKDOWN_KEY,
-    JSON.stringify(breakdowns)
-  );
-
+function toast(t){
+ const x=document.getElementById('toast');
+ x.textContent=t;x.classList.add('show');
+ setTimeout(()=>x.classList.remove('show'),1800);
 }
 
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-function toast(message){
-
-  const element =
-    document.getElementById('toast');
-
-  element.textContent =
-    message;
-
-  element.classList.add('show');
-
-  setTimeout(
-    () =>
-      element.classList.remove('show'),
-    1800
-  );
-
+function esc(x){
+ return String(x??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 }
-
-
-/* =========================================================
-   ESCAPAR HTML
-========================================================= */
-
-function esc(value){
-
-  return String(
-    value ?? ''
-  ).replace(
-    /[&<>"]/g,
-    c => ({
-      '&':'&amp;',
-      '<':'&lt;',
-      '>':'&gt;',
-      '"':'&quot;'
-    }[c])
-  );
-
-}
-
-
-/* =========================================================
-   LÍNEAS
-========================================================= */
 
 function render(){
-
-  document.getElementById(
-    'globalDate'
-  ).value =
-    currentDate;
-
-
-  renderLines();
-
-  renderHistory();
-
-  renderBreakdowns();
-
+ document.getElementById('date').value=currentDate;
+ renderLines();
+ renderBreakdowns();
 }
-
-
-/* =========================================================
-   RENDER DE LAS 5 LÍNEAS
-========================================================= */
 
 function renderLines(){
+ let html='';
 
-  const container =
-    document.getElementById('lines');
+ for(let line=1;line<=5;line++){
+  const rows=productions.filter(p=>p.fecha===currentDate&&p.linea===line);
 
+  html+=`
+  <div class="line">
+   <div class="linehead">
+    <b>LÍNEA ${line}</b>
+    <span class="status">${rows.length} producción${rows.length===1?'':'es'}</span>
+   </div>
 
-  let html = '';
+   <div class="form">
+    <div class="fields">
 
+     <div class="field"><label>Número de lote</label>
+     <input id="lot-${line}" placeholder="Ej. L-1234"></div>
 
-  for(let line = 1; line <= 5; line++){
+     <div class="field"><label>Descripción</label>
+     <input id="desc-${line}" placeholder="Caja grande"></div>
 
-    const rows =
-      productions.filter(
-        p =>
-          p.fecha === currentDate &&
-          Number(p.linea) === line
-      );
+     <div class="field"><label>Tipo de fondos</label>
+     <input id="fondos-${line}"></div>
 
+     <div class="field"><label>Humedad</label>
+     <input id="hum-${line}" placeholder="Ej. 12%"></div>
 
-    html += `
+     <div class="field"><label>Velocidad (cajas/h)</label>
+     <input id="speed-${line}" type="number" min="0"></div>
 
-      <div class="line">
+     <div class="field"><label>Cajas producidas</label>
+     <input id="boxes-${line}" type="number" min="0"></div>
 
-        <div class="linehead">
-
-          <b>
-            LÍNEA ${line}
-          </b>
-
-          <span class="status">
-            ${rows.length
-              ? rows.length + ' producción' +
-                (rows.length === 1 ? '' : 'es')
-              : 'Sin producción'}
-          </span>
-
-        </div>
-
-
-        <div class="form">
-
-          <div class="fields">
-
-            <div class="field">
-
-              <label>
-                Número de lote
-              </label>
-
-              <input
-                id="lot-${line}"
-                placeholder="Ej. L-1234"
-              >
-
-            </div>
-
-
-            <div class="field">
-
-              <label>
-                Descripción de la caja
-              </label>
-
-              <input
-                id="desc-${line}"
-                placeholder="Ej. Caja grande"
-              >
-
-            </div>
-
-
-            <div class="field">
-
-              <label>
-                Tipo de fondos
-              </label>
-
-              <input
-                id="fondos-${line}"
-                placeholder="Tipo de fondo"
-              >
-
-            </div>
-
-
-            <div class="field">
-
-              <label>
-                Humedad del cuadradillo
-              </label>
-
-              <input
-                id="humidity-${line}"
-                placeholder="Ej. 12%"
-              >
-
-            </div>
-
-
-            <div class="field">
-
-              <label>
-                Velocidad (cajas/hora)
-              </label>
-
-              <input
-                id="speed-${line}"
-                type="number"
-                min="0"
-              >
-
-            </div>
-
-
-            <div class="field">
-
-              <label>
-                Cajas producidas
-              </label>
-
-              <input
-                id="boxes-${line}"
-                type="number"
-                min="0"
-              >
-
-            </div>
-
-
-            <div class="field full">
-
-              <label>
-                Inicio de producción
-              </label>
-
-              <input
-                id="start-${line}"
-                type="datetime-local"
-              >
-
-            </div>
-
-          </div>
-
-
-          <button
-            class="save"
-            onclick="saveProduction(${line})"
-          >
-            💾 GUARDAR PRODUCCIÓN LÍNEA ${line}
-          </button>
-
-
-          <div class="production-list">
-
-            ${
-              rows.length
-
-              ?
-
-              rows
-                .slice()
-                .sort(
-                  (a,b) =>
-                    String(b.inicio || '')
-                      .localeCompare(
-                        String(a.inicio || '')
-                      )
-                )
-                .map(
-                  p => productionHTML(p)
-                )
-                .join('')
-
-              :
-
-              '<div class="empty">Todavía no hay producciones en esta línea.</div>'
-            }
-
-          </div>
-
-        </div>
-
-      </div>
-
-    `;
-
-  }
-
-
-  container.innerHTML =
-    html;
-
-}
-
-
-/* =========================================================
-   HTML DE UNA PRODUCCIÓN
-========================================================= */
-
-function productionHTML(p){
-
-  return `
-
-    <div class="production">
-
-      <div class="production-head">
-
-        <div class="production-title">
-          ${esc(p.lote || 'Sin lote')}
-        </div>
-
-        <button
-          class="danger"
-          onclick="deleteProduction('${p.id}')"
-        >
-          🗑️
-        </button>
-
-      </div>
-
-
-      <div class="production-data">
-
-        <div>
-          <span>Descripción:</span>
-          ${esc(p.descripcion || '-')}
-        </div>
-
-        <div>
-          <span>Fondos:</span>
-          ${esc(p.fondos || '-')}
-        </div>
-
-        <div>
-          <span>Humedad:</span>
-          ${esc(p.humedad || '-')}
-        </div>
-
-        <div>
-          <span>Velocidad:</span>
-          ${esc(p.velocidad || '-')}
-        </div>
-
-        <div>
-          <span>Cajas:</span>
-          ${esc(p.cajas || '-')}
-        </div>
-
-        <div>
-          <span>Inicio:</span>
-          ${esc(formatDateTime(p.inicio))}
-        </div>
-
-      </div>
+     <div class="field full"><label>Inicio</label>
+     <input id="start-${line}" type="datetime-local"></div>
 
     </div>
 
-  `;
+    <button class="save" onclick="saveProduction(${line})">
+     💾 GUARDAR PRODUCCIÓN
+    </button>
 
+    <div>
+     ${rows.length?rows.slice().reverse().map(productionHTML).join(''):
+     '<div class="empty">Sin producciones todavía.</div>'}
+    </div>
+   </div>
+  </div>`;
+ }
+
+ document.getElementById('lines').innerHTML=html;
 }
 
+function productionHTML(p){
+ return `
+ <div class="production">
+  <div class="production-head">
+   <div class="production-title">${esc(p.lote||'Sin lote')}</div>
+   <button class="danger" onclick="deleteProduction('${p.id}')">🗑️</button>
+  </div>
 
-/* =========================================================
-   GUARDAR PRODUCCIÓN
-========================================================= */
+  <div class="data">
+   <div><span>Descripción:</span> ${esc(p.descripcion||'-')}</div>
+   <div><span>Fondos:</span> ${esc(p.fondos||'-')}</div>
+   <div><span>Humedad:</span> ${esc(p.humedad||'-')}</div>
+   <div><span>Velocidad:</span> ${esc(p.velocidad||'-')}</div>
+   <div><span>Cajas:</span> ${esc(p.cajas||'-')}</div>
+   <div><span>Inicio:</span> ${esc(p.inicio||'-')}</div>
+  </div>
+
+  <div class="pactions">
+   <button onclick="exportOne('${p.id}')">📥 Excel</button>
+  </div>
+ </div>`;
+}
 
 function saveProduction(line){
+ const v=id=>document.getElementById(id+'-'+line).value.trim();
 
-  const lote =
-    document.getElementById(
-      `lot-${line}`
-    ).value.trim();
+ const lote=v('lot'),descripcion=v('desc'),fondos=v('fondos');
+ const humedad=v('hum'),velocidad=v('speed'),cajas=v('boxes');
+ const inicio=v('start');
 
+ if(!lote&&!descripcion&&!cajas&&!inicio){
+  toast('Introduce algún dato');return;
+ }
 
-  const descripcion =
-    document.getElementById(
-      `desc-${line}`
-    ).value.trim();
+ productions.push({
+  id:Date.now()+'_'+Math.random().toString(36).slice(2),
+  fecha:currentDate,
+  linea:line,
+  lote,descripcion,fondos,humedad,velocidad,cajas,inicio,
+  creado:new Date().toISOString()
+ });
 
-
-  const fondos =
-    document.getElementById(
-      `fondos-${line}`
-    ).value.trim();
-
-
-  const humedad =
-    document.getElementById(
-      `humidity-${line}`
-    ).value.trim();
-
-
-  const velocidad =
-    document.getElementById(
-      `speed-${line}`
-    ).value;
-
-
-  const cajas =
-    document.getElementById(
-      `boxes-${line}`
-    ).value;
-
-
-  const inicio =
-    document.getElementById(
-      `start-${line}`
-    ).value;
-
-
-  if(
-    !lote &&
-    !descripcion &&
-    !cajas &&
-    !inicio
-  ){
-
-    toast(
-      'Introduce al menos lote, cajas o inicio'
-    );
-
-    return;
-
-  }
-
-
-  const production = {
-
-    id:
-      Date.now().toString() +
-      '_' +
-      Math.random()
-        .toString(36)
-        .slice(2),
-
-    fecha:
-      currentDate,
-
-    linea:
-      Number(line),
-
-    lote:
-      lote,
-
-    descripcion:
-      descripcion,
-
-    fondos:
-      fondos,
-
-    humedad:
-      humedad,
-
-    velocidad:
-      velocidad,
-
-    cajas:
-      cajas,
-
-    inicio:
-      inicio,
-
-    creado:
-      new Date().toISOString()
-
-  };
-
-
-  productions.push(
-    production
-  );
-
-
-  saveStorage();
-
-
-  /*
-    Limpiamos el formulario después
-    de guardar para poder introducir
-    inmediatamente la siguiente producción.
-  */
-
-  clearProductionForm(line);
-
-
-  render();
-
-
-  toast(
-    `Producción guardada en línea ${line}`
-  );
-
+ save();
+ render();
+ toast('Producción guardada');
 }
-
-
-/* =========================================================
-   LIMPIAR FORMULARIO
-========================================================= */
-
-function clearProductionForm(line){
-
-  document.getElementById(
-    `lot-${line}`
-  ).value = '';
-
-  document.getElementById(
-    `desc-${line}`
-  ).value = '';
-
-  document.getElementById(
-    `fondos-${line}`
-  ).value = '';
-
-  document.getElementById(
-    `humidity-${line}`
-  ).value = '';
-
-  document.getElementById(
-    `speed-${line}`
-  ).value = '';
-
-  document.getElementById(
-    `boxes-${line}`
-  ).value = '';
-
-  document.getElementById(
-    `start-${line}`
-  ).value = '';
-
-}
-
-
-/* =========================================================
-   BORRAR PRODUCCIÓN
-========================================================= */
 
 function deleteProduction(id){
-
-  if(
-    !confirm(
-      '¿Quieres eliminar esta producción?'
-    )
-  ){
-
-    return;
-
-  }
-
-
-  productions =
-    productions.filter(
-      p => String(p.id) !== String(id)
-    );
-
-
-  saveStorage();
-
-  render();
-
-  toast(
-    'Producción eliminada'
-  );
-
+ if(!confirm('¿Eliminar esta producción?'))return;
+ productions=productions.filter(p=>p.id!==id);
+ save();render();toast('Producción eliminada');
 }
 
-
-/* =========================================================
-   HISTORIAL
-========================================================= */
-
-function renderHistory(){
-
-  const dates =
-    [
-      ...new Set(
-        productions
-          .map(p => p.fecha)
-          .filter(Boolean)
-      )
-    ]
-    .sort()
-    .reverse();
-
-
-  const select =
-    document.getElementById(
-      'historySelect'
-    );
-
-
-  select.innerHTML =
-    '<option value="">Selecciona una fecha</option>' +
-
-    dates.map(
-      date =>
-        `<option value="${esc(date)}">
-          ${esc(date)}
-        </option>`
-    ).join('');
-
-
-  select.value =
-    currentDate;
-
+function changeDate(d){
+ if(d){currentDate=d;render();}
 }
-
-
-/* =========================================================
-   CAMBIAR FECHA
-========================================================= */
-
-function changeDate(date){
-
-  if(!date){
-
-    return;
-
-  }
-
-
-  currentDate =
-    date;
-
-
-  render();
-
-}
-
-
-/* =========================================================
-   NUEVA JORNADA
-========================================================= */
 
 function newDay(){
-
-  const today =
-    localDate();
-
-
-  currentDate =
-    today;
-
-
-  render();
-
-  toast(
-    'Nueva jornada preparada'
-  );
-
+ currentDate=today();render();toast('Nueva jornada');
 }
-
-
-/* =========================================================
-   FECHA/HORA PARA MOSTRAR
-========================================================= */
-
-function formatDateTime(value){
-
-  if(!value){
-
-    return '-';
-
-  }
-
-
-  try{
-
-    const d =
-      new Date(value);
-
-
-    if(
-      Number.isNaN(
-        d.getTime()
-      )
-    ){
-
-      return value;
-
-    }
-
-
-    return d.toLocaleString(
-      'es-ES',
-      {
-        day:'2-digit',
-        month:'2-digit',
-        year:'numeric',
-        hour:'2-digit',
-        minute:'2-digit'
-      }
-    );
-
-  }catch{
-
-    return value;
-
-  }
-
-}
-
-
-/* =========================================================
-   AVERÍAS
-========================================================= */
 
 function addBreakdown(){
+ const reason=document.getElementById('bdreason').value.trim();
+ if(!reason){toast('Introduce el motivo');return;}
 
-  const line =
-    Number(
-      document.getElementById(
-        'bdline'
-      ).value
-    );
+ breakdowns.push({
+  id:Date.now()+'_'+Math.random().toString(36).slice(2),
+  fecha:currentDate,
+  linea:document.getElementById('bdline').value,
+  at:document.getElementById('bdat').value,
+  minutes:document.getElementById('bdmin').value,
+  reason,
+  notes:document.getElementById('bdnotes').value.trim()
+ });
 
+ document.getElementById('bdmin').value='';
+ document.getElementById('bdreason').value='';
+ document.getElementById('bdnotes').value='';
 
-  const at =
-    document.getElementById(
-      'bdat'
-    ).value;
-
-
-  const minutes =
-    document.getElementById(
-      'bdmin'
-    ).value;
-
-
-  const reason =
-    document.getElementById(
-      'bdreason'
-    ).value.trim();
-
-
-  const notes =
-    document.getElementById(
-      'bdnotes'
-    ).value.trim();
-
-
-  if(!reason){
-
-    toast(
-      'Introduce el motivo de la avería'
-    );
-
-    return;
-
-  }
-
-
-  breakdowns.push({
-
-    id:
-      Date.now().toString() +
-      '_' +
-      Math.random()
-        .toString(36)
-        .slice(2),
-
-    fecha:
-      currentDate,
-
-    linea:
-      line,
-
-    at:
-      at,
-
-    minutes:
-      minutes,
-
-    reason:
-      reason,
-
-    notes:
-      notes
-
-  });
-
-
-  saveStorage();
-
-
-  document.getElementById(
-    'bdmin'
-  ).value = '';
-
-  document.getElementById(
-    'bdreason'
-  ).value = '';
-
-  document.getElementById(
-    'bdnotes'
-  ).value = '';
-
-
-  render();
-
-  toast(
-    'Avería guardada'
-  );
-
+ save();render();toast('Avería guardada');
 }
 
-
-/* =========================================================
-   MOSTRAR AVERÍAS
-========================================================= */
-
 function renderBreakdowns(){
+ const list=breakdowns.filter(b=>b.fecha===currentDate);
+ document.getElementById('breakdowns').innerHTML=
+ list.length?list.map(b=>`
+ <div class="production">
+  <b>Línea ${b.linea}</b><br>
+  <small>${esc(b.reason)} · ${esc(b.minutes||0)} min</small>
+  ${b.notes?'<br><small>'+esc(b.notes)+'</small>':''}
+ </div>`).join(''):
+ '<div class="empty">Sin averías.</div>';
+}
 
-  const list =
-    breakdowns
-      .filter(
-        b =>
-          b.fecha === currentDate
-      )
-      .so
+function excel(rows,name){
+ if(!rows.length){toast('No hay datos');return;}
+ const data=rows.map(p=>({
+  Fecha:p.fecha,
+  Linea:p.linea,
+  Lote:p.lote,
+  Descripcion:p.descripcion,
+  Fondos:p.fondos,
+  Humedad:p.humedad,
+  Velocidad:p.velocidad,
+  Cajas:p.cajas,
+  Inicio:p.inicio
+ }));
+ const ws=XLSX.utils.json_to_sheet(data);
+ const wb=XLSX.utils.book_new();
+ XLSX.utils.book_append_sheet(wb,ws,'Producciones');
+ XLSX.writeFile(wb,name);
+}
+
+function exportOne(id){
+ const p=productions.find(x=>x.id===id);
+ if(p)excel([p],'produccion_'+p.lote+'.xlsx');
+}
+
+function exportAll(){
+ excel(productions,'producciones.xlsx');
+}
+
+render();
+</script>
+
+</body>
+</html>
